@@ -1,0 +1,58 @@
+{
+  "cli": {
+    "version": ">= 12.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": false
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "development",
+        "GOOGLE_MAPS_API_KEY": "AIzaSyBedJGG9UR-vbUZKa_8z7ud8g4P5JI3iQ8",
+        "EXPO_PUBLIC_SUPABASE_URL": "REPLACE_WITH_YOUR_SUPABASE_URL",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "REPLACE_WITH_YOUR_SUPABASE_ANON_KEY"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": {
+        "buildConfiguration": "Release"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "preview",
+        "GOOGLE_MAPS_API_KEY": "AIzaSyBedJGG9UR-vbUZKa_8z7ud8g4P5JI3iQ8",
+        "EXPO_PUBLIC_SUPABASE_URL": "REPLACE_WITH_YOUR_SUPABASE_URL",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "REPLACE_WITH_YOUR_SUPABASE_ANON_KEY"
+      }
+    },
+    "production": {
+      "ios": {
+        "buildConfiguration": "Release"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "GOOGLE_MAPS_API_KEY": "AIzaSyBedJGG9UR-vbUZKa_8z7ud8g4P5JI3iQ8",
+        "EXPO_PUBLIC_SUPABASE_URL": "REPLACE_WITH_YOUR_SUPABASE_URL",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "REPLACE_WITH_YOUR_SUPABASE_ANON_KEY"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./google-services-key.json",
+        "track": "internal"
+      }
+    }
+  }
+}

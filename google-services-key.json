@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "bord-488505",
+  "private_key_id": "9e601528bbfd2d86a87f4b82ceedcc54abf1e5f9",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCrOmh89Ruji0Js\nXjurlaAscWclvHiir+NQIMIl6yv4dI8lwzr5yeiCOYD1ujzDIFY5gYPXLre2J9nc\npGmRTYUNwP7RlwACz0iYy+yB9fEcrJ56lTLqKVcyUi2Y4K0VybR3PqtUPkByDaIw\nonfmo0susH5gFFqyYb/1b3Ovu78ujdMb87gqG/SFwARF05n4QAac3QEsW8Vy2gJV\nokx7ZmZ92j7zG7OeE/GYBSq2Xiyf6sIA6Z9dNJZiYu5u4Able6tk5coA3kr8D2/E\n1IDiXmLM36uTW+woakoHGJackLT0bo6W2AtGJEimSFKS6J+0ZjWZy2I/KW8YJK5q\nEcq7aQWvAgMBAAECgf9h/IrO93VZodfhLAv5pSaESGE+txxR/VWYBScVi/8dr5Y7\nhf259FGaNE4YUPt0roypW/SWr6VyGFwUaAIBpNr/g/JO/pqDARwKVKiDtrrELgSD\nId6BIidEJMLzOZ/TWBpuIu7oxrcajbLDIjZ7RfdAQMARO5SrgETZr24EouxFNvRq\nTcK6+nYjfxHUSUr5fIKPcvVSHoURjcAug57gXbnAi6/SwxY/QU3tikRtXQBQFvpH\nKqIpuI7Gsd482KRiHimxbIjnp9v5C5VL6z+sQ21EBd0Jv8mnEQU3/zM503MFNWPT\npotcCR/9JjBvLqQ4XpgpnemvgA81w9AzgDP+H50CgYEA1drW0qF3sKtU954dZceF\nZSwsR/u0gUjIi1Wz3lPLVglq3zAVqOSgFs5PuhkiGZbsaG21Yt5rnnGWPs/Ou6ei\n/gYPwQjtS4VMHPEnEVg9iwyqi4PFyYfG6zIB2IJDhGrQs32RTmmPUBEWDh4Sy8aG\ntIf4Ql4wqBXl1Vm/Pxopwd0CgYEAzPkEIANrI1IxBRisYSr/rnbgvtWmq88Sp4RG\nJdPAdLnb0nK7DxO4yd4Tdenk09HKSvPvXf6aRpSeIHMBxuikLGPtOjIl1Uz9w9At\nyx6juf5UWn5aJyrw1ElDcbMoL+6xPAUcJpBtrkYVH51ASg1Oymf0MbLRCCueCuzT\nJkotmvsCgYBEsEez270P99gQuK6ElHNaLbgDXut5YyFW764YSR3Ugq3bBhzO5LAu\n4xFkmtIDGiDQ4fwSx5IVkDJL9n9Wct+9a8D/pZhiW2w5F5QO1CLgWK8mpKqQspXH\n0YYaPqzlCVIDdN+JKgqoEvTcj/hFj3yQ2+N3nb1PH8l0n6D36bVj2QKBgQCtwmeZ\nz+wSHEoL/Pecw7vOJV6uyCWrvjYdJkflJ1YeXbSY+cPTqy9aidVLf0UJv+3Sjmob\n74rPTIukDHq0KWGLdAaV8A8cfFEfnypC5616Lb1KnZRFYeSYwabYCz2FLL64l8he\ndM9WDnk3vLHUVOW3NlrPirwjRf6LWmpBKl7w4wKBgQCxPoYygiwXGBP40wRsfgVA\nK+FxdIdLatlKTlTTMEPh5H/c8i4Mqb5dXuUFFfdkd/Vlk4VMdoQ4JBpTExlpUVYH\nLPA0AtQVo1dFKPEV1LOCgAWEBbJvQ1KS454QoLb34qhvFUy5mlydFV2UugMFQJSC\nAbM5RPVYnNH/60PNTOMP1Q==\n-----END PRIVATE KEY-----\n",
+  "client_email": "expo-play-submit@bord-488505.iam.gserviceaccount.com",
+  "client_id": "111638554366579296604",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/expo-play-submit%40bord-488505.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

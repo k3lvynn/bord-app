@@ -1,0 +1,147 @@
+{
+  "expo": {
+    "name": "Bord",
+    "slug": "bord",
+    "version": "1.0.56",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#0A0A0A"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.bord.host",
+      "buildNumber": "56",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Bord uses your camera to add photos to your event.",
+        "NSPhotoLibraryUsageDescription": "Bord uses your photo library so you can share moments from events.",
+        "NSLocationWhenInUseUsageDescription": "Bord shows events near you on the map.",
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryAddUsageDescription": "Bord saves photos to your library when you download event media.",
+        "LSApplicationQueriesSchemes": [
+          "instagram-stories",
+          "instagram"
+        ]
+      },
+      "config": {
+        "googleMapsApiKey": "$(GOOGLE_MAPS_API_KEY)"
+      },
+      "icon": "./assets/icon.png",
+      "jsEngine": "hermes",
+      "associatedDomains": [
+        "applinks:bordevents.com",
+        "applinks:www.bordevents.com"
+      ]
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F97316"
+      },
+      "package": "app.bord.host",
+      "versionCode": 56,
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "READ_MEDIA_IMAGES"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "$(GOOGLE_MAPS_API_KEY)"
+        }
+      },
+      "jsEngine": "hermes",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "bordevents.com",
+              "pathPrefix": "/events"
+            },
+            {
+              "scheme": "https",
+              "host": "www.bordevents.com",
+              "pathPrefix": "/events"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-location",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.app.bord",
+          "enableGooglePay": true
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "minSdkVersion": 24
+          },
+          "ios": {
+            "deploymentTarget": "17.0"
+          }
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Bord uses your photo library so you can share moments from events.",
+          "cameraPermission": "Bord needs camera access to take a team photo."
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Allow Bord to add events to your calendar."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Bord needs camera access to scan event tickets at the door.",
+          "microphonePermission": false
+        }
+      ],
+      "expo-av"
+    ],
+    "scheme": "bord",
+    "extra": {
+      "supabaseUrl": "https://liqjkhethvfmrqxbeont.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpcWpraGV0aHZmbXJxeGJlb250Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3MTEzNDIsImV4cCI6MjA4NzI4NzM0Mn0.34Hak6nF_J-zzpMbanOaoxmBQw2t-38Y3r0jjse0cN4",
+      "stripePublishableKey": "pk_test_51T4C6mFoFWlnUlxnfpZqThHk8VSCfzyCt7Zk6RaUoIuXzcrn5Y9wy1juptcsu7R2LIhQYQSgVcNhWSx5kYhyI0kF00iKUO58ev",
+      "eas": {
+        "projectId": "8489bc70-78da-47bd-b9fd-2d99b7fb98bb"
+      }
+    },
+    "owner": "bord.app",
+    "newArchEnabled": false,
+    "jsEngine": "hermes"
+  }
+}

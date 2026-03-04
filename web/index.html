@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bord Events</title>
+
+  <!-- Open Graph / Social preview tags — filled dynamically -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Bord Events" />
+  <meta id="og-title"       property="og:title"       content="Bord Event" />
+  <meta id="og-description" property="og:description" content="Check out this event on Bord" />
+  <meta id="og-url"         property="og:url"         content="" />
+  <meta id="meta-title"     name="title"               content="Bord Event" />
+  <meta id="meta-desc"      name="description"         content="Check out this event on Bord" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange: #F97316;
+      --black:  #0A0A0A;
+      --card:   #1A1A1A;
+      --border: #2C2C2C;
+      --white:  #FFFFFF;
+      --gray:   #A8A29E;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--black);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Header ── */
+    .header {
+      width: 100%;
+      max-width: 480px;
+      padding: 20px 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { font-size: 26px; font-weight: 900; letter-spacing: -1px; }
+    .logo span { color: var(--orange); }
+    .logo-tag { font-size: 11px; color: var(--gray); margin-top: 2px; }
+    .logo-wrap { line-height: 1.2; }
+
+    /* ── Card ── */
+    .card {
+      width: 100%;
+      max-width: 480px;
+      margin: 24px 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .orange-accent { border-left: 4px solid var(--orange); }
+
+    .card-body { padding: 24px; }
+
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(249,115,22,0.1);
+      border: 1px solid rgba(249,115,22,0.25);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--orange);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .event-title {
+      font-size: 26px;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 18px;
+    }
+
+    /* Prize banner */
+    .prize-banner {
+      background: linear-gradient(135deg, rgba(249,115,22,0.15), rgba(234,179,8,0.1));
+      border: 1px solid rgba(249,115,22,0.3);
+      border-radius: 12px;
+      padding: 14px 16px;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    .prize-label { font-size: 11px; font-weight: 700; color: var(--orange); letter-spacing: 1px; text-transform: uppercase; }
+    .prize-amount { font-size: 22px; font-weight: 900; color: #FCD34D; margin: 4px 0 2px; }
+    .prize-sub { font-size: 12px; color: var(--gray); }
+
+    /* Meta rows */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .meta-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .meta-label { font-size: 10px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .meta-value { font-size: 14px; font-weight: 600; color: var(--white); }
+    .meta-value.highlight { color: var(--orange); }
+
+    /* Capacity bar */
+    .cap-bar-wrap {
+      background: rgba(255,255,255,0.06);
+      border-radius: 6px;
+      height: 6px;
+      margin: 10px 0 6px;
+      overflow: hidden;
+    }
+    .cap-bar-fill {
+      height: 100%;
+      background: var(--orange);
+      border-radius: 6px;
+      transition: width 0.6s ease;
+    }
+    .cap-bar-fill.full { background: #F43F5E; }
+    .cap-label { font-size: 11px; color: var(--gray); display: flex; justify-content: space-between; }
+
+    /* Description */
+    .desc {
+      font-size: 14px;
+      color: var(--gray);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    /* Divider */
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+    /* Buttons */
+    .btn-wrap { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 10px; }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s;
+    }
+    .btn:active { opacity: 0.8; }
+
+    .btn-primary {
+      background: var(--orange);
+      color: white;
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--white);
+    }
+
+    .btn-sub { font-size: 12px; color: rgba(255,255,255,0.5); text-align: center; margin-top: -4px; }
+
+    /* Loading / error */
+    .state-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 60px 20px;
+      flex: 1;
+      width: 100%;
+      max-width: 480px;
+    }
+    .state-emoji { font-size: 52px; }
+    .state-title { font-size: 22px; font-weight: 700; }
+    .state-sub { font-size: 14px; color: var(--gray); text-align: center; line-height: 1.5; }
+
+    /* Spinner */
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--orange);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Footer */
+    .footer {
+      padding: 20px;
+      font-size: 12px;
+      color: var(--gray);
+      text-align: center;
+    }
+    .footer a { color: var(--orange); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="logo-wrap">
+      <div class="logo">B<span>ord</span></div>
+      <div class="logo-tag">are you bored?</div>
+    </div>
+  </div>
+
+  <div id="app" style="width:100%;max-width:480px;display:flex;flex-direction:column;align-items:center;">
+    <!-- Loading state -->
+    <div class="state-wrap" id="loading">
+      <div class="spinner"></div>
+      <div class="state-title">Loading event…</div>
+    </div>
+
+    <!-- Event card (hidden until loaded) -->
+    <div id="event-wrap" style="display:none;width:100%;">
+      <div class="card orange-accent">
+        <div class="card-body">
+          <div class="category-badge" id="cat-badge">🎉 Event</div>
+          <h1 class="event-title" id="event-title"></h1>
+
+          <div id="prize-banner" class="prize-banner" style="display:none;">
+            <div class="prize-label">🏆 Prize on the Line</div>
+            <div class="prize-amount" id="prize-amount"></div>
+            <div class="prize-sub">Winner takes the glory — and the prize</div>
+          </div>
+
+          <div class="meta-grid">
+            <div class="meta-item">
+              <div class="meta-label">📅 Date</div>
+              <div class="meta-value" id="meta-date"></div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">⏰ Time</div>
+              <div class="meta-value" id="meta-time"></div>
+            </div>
+            <div class="meta-item" style="grid-column: span 2;">
+              <div class="meta-label">📍 Location</div>
+              <div class="meta-value" id="meta-location"></div>
+            </div>
+            <div class="meta-item" id="meta-price-wrap" style="display:none; grid-column: span 2;">
+              <div class="meta-label" id="meta-price-label">💰 Buy-In</div>
+              <div class="meta-value highlight" id="meta-price"></div>
+            </div>
+          </div>
+
+          <!-- Capacity bar -->
+          <div id="cap-wrap">
+            <div class="cap-label">
+              <span>SPOTS</span>
+              <span id="cap-text"></span>
+            </div>
+            <div class="cap-bar-wrap">
+              <div class="cap-bar-fill" id="cap-bar"></div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Description -->
+          <div class="desc" id="event-desc" style="display:none;"></div>
+
+        </div>
+
+        <div class="btn-wrap">
+          <!-- Deep link: opens app if installed -->
+          <a class="btn btn-primary" id="btn-register" href="#">
+            🎉 Register on Bord
+          </a>
+          <!-- Fallback: App Store / Play Store -->
+          <div style="display:flex;gap:10px;">
+            <a class="btn btn-secondary" style="flex:1;font-size:13px;" href="https://apps.apple.com/app/bord/id0000000000" target="_blank">
+              🍎 App Store
+            </a>
+            <a class="btn btn-secondary" style="flex:1;font-size:13px;" href="https://play.google.com/store/apps" target="_blank">
+              🤖 Google Play
+            </a>
+          </div>
+          <div class="btn-sub">Don't have Bord yet? Download it free.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error state (hidden) -->
+    <div class="state-wrap" id="error-state" style="display:none;">
+      <div class="state-emoji">🤷</div>
+      <div class="state-title">Event not found</div>
+      <div class="state-sub">This event may have been removed or the link may be incorrect.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Powered by <a href="https://bordevents.com">Bord</a> · 
+    <a href="https://apps.apple.com/app/bord/id0000000000">Download the app</a>
+  </div>
+
+<script>
+  // ── Config — replace with your real Supabase values ──────────────────────
+  const SUPABASE_URL     = 'https://liqjkhethvfmrqxbeont.supabase.co';
+  const SUPABASE_ANON_KEY = 'REPLACE_WITH_YOUR_ANON_KEY'; // paste from your .env
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function fmtDate(d) {
+    if (!d) return '';
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  function fmtTime(t) {
+    if (!t) return '';
+    const [h, m] = t.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+  }
+  function getSlug() {
+    // Supports /events/[slug] and /?slug=[slug]
+    const path = window.location.pathname;
+    const parts = path.split('/').filter(Boolean);
+    if (parts[0] === 'events' && parts[1]) return parts[1];
+    return new URLSearchParams(window.location.search).get('slug');
+  }
+  function setCatBadge(category, hasBuyIn) {
+    const catEmojis = {
+      flag_football:'🏈', basketball:'🏀', soccer:'⚽', volleyball:'🏐',
+      softball:'🥎', tennis:'🎾', pickleball:'🏓', golf:'⛳', cornhole:'🌽',
+      dodgeball:'🔴', kickball:'⚽', ultimate_frisbee:'🥏', hiking:'🥾',
+      running:'🏃', cycling:'🚴', yoga:'🧘', fitness:'💪', swimming:'🏊',
+      trivia:'🧠', board_games:'🎲', cards:'🃏', art:'🎨', music:'🎵',
+      food:'🍕', cooking:'👨‍🍳', social:'🎉', party:'🎊', networking:'🤝',
+      other:'⭐',
+    };
+    const emoji = catEmojis[category] || '⭐';
+    const label = (category || 'event').replace(/_/g,' ').toUpperCase();
+    const mode = hasBuyIn ? ' · COMPETE' : ' · GATHER';
+    document.getElementById('cat-badge').textContent = `${emoji} ${label}${mode}`;
+  }
+
+  // ── Main ──────────────────────────────────────────────────────────────────
+  async function loadEvent() {
+    const slug = getSlug();
+    if (!slug) { showError(); return; }
+
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/events?slug=eq.${encodeURIComponent(slug)}&select=*&limit=1`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+      );
+      const events = await res.json();
+      if (!events?.length) { showError(); return; }
+      renderEvent(events[0]);
+    } catch (e) {
+      showError();
+    }
+  }
+
+  function renderEvent(ev) {
+    document.title = `${ev.title} · Bord Events`;
+    document.getElementById('og-title').content       = ev.title;
+    document.getElementById('og-description').content = ev.description || `${fmtDate(ev.date)} · ${ev.location}`;
+    document.getElementById('og-url').content         = window.location.href;
+    document.getElementById('meta-title').content     = ev.title;
+    document.getElementById('meta-desc').content      = ev.description || `${fmtDate(ev.date)} · ${ev.location}`;
+
+    document.getElementById('event-title').textContent    = ev.title;
+    document.getElementById('meta-date').textContent      = fmtDate(ev.date);
+    document.getElementById('meta-time').textContent      = fmtTime(ev.time);
+    document.getElementById('meta-location').textContent  = ev.location;
+    setCatBadge(ev.category, ev.has_buy_in);
+
+    // Prize
+    if (ev.prize_pool) {
+      document.getElementById('prize-banner').style.display = 'block';
+      document.getElementById('prize-amount').textContent   = ev.prize_pool;
+    }
+
+    // Buy-in price
+    if (ev.has_buy_in && ev.buy_in_amount) {
+      const totalCents = Math.round(ev.buy_in_amount * 1.10 * 100) / 100;
+      document.getElementById('meta-price-wrap').style.display = 'block';
+      document.getElementById('meta-price-label').textContent = ev.is_tournament ? '💰 Buy-In' : '🎟️ Ticket Price';
+      document.getElementById('meta-price').textContent = `$${totalCents.toFixed(2)} (incl. 10% fee)`;
+    }
+
+    // Capacity bar
+    const spots = ev.cap - (ev.rsvp_count || 0);
+    const pct   = Math.min(100, ((ev.rsvp_count || 0) / ev.cap) * 100);
+    const bar   = document.getElementById('cap-bar');
+    bar.style.width = `${pct}%`;
+    if (spots <= 0) bar.classList.add('full');
+    document.getElementById('cap-text').textContent = spots > 0
+      ? `${spots} of ${ev.cap} spots left`
+      : 'FULL';
+
+    // Description
+    if (ev.description) {
+      const descEl = document.getElementById('event-desc');
+      descEl.textContent = ev.description;
+      descEl.style.display = 'block';
+    }
+
+    // Deep link button
+    const deepLink = `bordevents://event/${ev.slug}`;
+    const registerBtn = document.getElementById('btn-register');
+    registerBtn.href = deepLink;
+    registerBtn.textContent = spots > 0
+      ? (ev.has_buy_in ? `🎟️ Register & Pay $${(ev.buy_in_amount * 1.10).toFixed(2)} →` : '🎉 RSVP on Bord →')
+      : '⏳ Join Waitlist →';
+
+    // Show card
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('event-wrap').style.display = 'block';
+  }
+
+  function showError() {
+    document.getElementById('loading').style.display    = 'none';
+    document.getElementById('error-state').style.display = 'flex';
+  }
+
+  loadEvent();
+</script>
+</body>
+</html>
