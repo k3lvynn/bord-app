@@ -64,6 +64,7 @@ function RootNavigator() {
         <Stack.Screen name="(auth)/welcome" />
         <Stack.Screen name="(auth)/sign-in"  options={{ ...sharedHeader, headerShown: true, title: 'Sign In' }} />
         <Stack.Screen name="(auth)/sign-up"  options={{ ...sharedHeader, headerShown: true, title: 'Create Account' }} />
+        <Stack.Screen name="event/[slug]"    options={{ ...sharedHeader, headerShown: true, title: '' }} />
       </Stack>
     );
   }

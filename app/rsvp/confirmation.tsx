@@ -84,13 +84,11 @@ export default function RSVPConfirmation() {
       }
 
       const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
-      // Prefer a default writable calendar
       const writable = calendars.find(c => c.allowsModifications && c.source?.isLocalAccount) ??
                        calendars.find(c => c.allowsModifications) ??
                        calendars[0];
       if (!writable) { Alert.alert('No calendar found'); return; }
 
-      // Build a minimal Event object for the helper
       const mockEvent = {
         title:       params.eventTitle ?? '',
         date:        params.eventDate  ?? '',
@@ -111,7 +109,7 @@ export default function RSVPConfirmation() {
         endDate:   payload.endDate,
         location:  payload.location,
         notes:     payload.notes,
-        alarms:    [{ relativeOffset: -60 }],  // 1hr reminder
+        alarms:    [{ relativeOffset: -60 }],
       });
 
       setCalAdded(true);
@@ -137,7 +135,6 @@ export default function RSVPConfirmation() {
     }
   };
 
-  // Pick headline + sub based on waitlist position
   const wlHeadline = WAITLIST_HEADLINES[(waitlistPos - 1) % WAITLIST_HEADLINES.length];
   const wlSub      = WAITLIST_SUBS[(waitlistPos - 1) % WAITLIST_SUBS.length](waitlistPos, params.name ?? '');
 
@@ -150,7 +147,6 @@ export default function RSVPConfirmation() {
 
   const eventUrl = `https://bordevents.com/events/${params.eventSlug}`;
 
-  // Native share sheet — opens Instagram, Snapchat, Threads, Messages, etc.
   const shareNative = async () => {
     setShowShareMenu(false);
     try {
@@ -191,8 +187,6 @@ export default function RSVPConfirmation() {
     }
   };
 
-  const shareEvent = () => openIgPicker();
-
   return (
     <View style={globalStyles.screen}>
       <ScrollView contentContainerStyle={styles.scroll}>
@@ -230,7 +224,6 @@ export default function RSVPConfirmation() {
         {/* ── CONFIRMED-SPECIFIC CONTENT ───────────────────────────── */}
         {isConfirmed && (
           <>
-            {/* Cancellation window */}
             {deadline && (
               <View style={styles.cancelCard}>
                 <Text style={styles.cancelTitle}>⏱ Cancellation Window</Text>
@@ -242,9 +235,8 @@ export default function RSVPConfirmation() {
               </View>
             )}
 
-            {/* What to bring */}
             <View style={styles.checklistCard}>
-                <Text style={styles.checklistTitle}>{"Checklist: You're all set"}</Text>
+              <Text style={styles.checklistTitle}>{"Checklist: You're all set"}</Text>
               <CheckRow text="Check your email — the host will include all details" />
               <CheckRow text="Show up on time — your name's on the roster" />
               <CheckRow text="Questions? Reach the host via the event board" />
@@ -277,7 +269,6 @@ export default function RSVPConfirmation() {
         <View style={styles.actions}>
           {isConfirmed && (
             <>
-              {/* Ticket / QR — only for paid events */}
               {hasBuyIn && params.rsvpId && (
                 <TouchableOpacity
                   style={styles.btnTicket}
@@ -288,7 +279,6 @@ export default function RSVPConfirmation() {
                 </TouchableOpacity>
               )}
 
-              {/* Calendar sync */}
               <TouchableOpacity
                 style={[styles.btnCalendar, calAdded && styles.btnCalendarDone]}
                 onPress={addToCalendar}
@@ -300,7 +290,6 @@ export default function RSVPConfirmation() {
                 </Text>
               </TouchableOpacity>
 
-              {/* Scan to Enter — shown for paid events only */}
               {hasBuyIn && (
                 <TouchableOpacity
                   style={styles.btnScan}
@@ -311,7 +300,6 @@ export default function RSVPConfirmation() {
                 </TouchableOpacity>
               )}
 
-              {/* Running Late */}
               <TouchableOpacity
                 style={[styles.btnLate, runningLate && styles.btnLateDone]}
                 onPress={handleRunningLate}
@@ -323,12 +311,24 @@ export default function RSVPConfirmation() {
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.btnShare} onPress={shareEvent} activeOpacity={0.85}>
+              <TouchableOpacity style={styles.btnShare} onPress={() => openIgPicker()} activeOpacity={0.85}>
                 <Text style={styles.btnShareText}>📲 Share this Event →</Text>
               </TouchableOpacity>
+            </>
+          )}
 
-      {/* ── Share menu modal ─────────────────────────────────── */}
-      {/* ── Share as Image modal ──────────────────────────────────── */}
+          <TouchableOpacity
+            style={styles.btnHome}
+            onPress={() => router.replace('/(tabs)')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.btnHomeText}>Back to Bord</Text>
+          </TouchableOpacity>
+        </View>
+
+      </ScrollView>
+
+      {/* ── Modals at root level (not nested in conditionals) ─────── */}
       <ShareFormatPicker
         visible={igPickerVisible}
         onSelect={onIgFormatSelected}
@@ -336,7 +336,6 @@ export default function RSVPConfirmation() {
         isCapturing={igIsCapturing}
       />
 
-      {/* Offscreen ShareCanvas for confirmation page */}
       <ShareCanvas
         ref={igCanvasRef}
         format={igSelectedFormat ?? 'story'}
@@ -360,7 +359,6 @@ export default function RSVPConfirmation() {
             <Text style={shareStyles.title}>Share Event</Text>
             <Text style={shareStyles.subtitle} numberOfLines={2}>{params.eventTitle}</Text>
 
-            {/* Share as image card */}
             <TouchableOpacity
               style={shareStyles.row}
               onPress={() => { setShowShareMenu(false); openIgPicker(); }}
@@ -377,7 +375,6 @@ export default function RSVPConfirmation() {
 
             <View style={shareStyles.divider} />
 
-            {/* Native share — opens system sheet with Instagram, Snapchat, Threads, etc. */}
             <TouchableOpacity style={shareStyles.row} onPress={shareNative} activeOpacity={0.8}>
               <View style={[shareStyles.iconBox, { backgroundColor: 'rgba(249,115,22,0.12)' }]}>
                 <Text style={shareStyles.icon}>📤</Text>
@@ -390,7 +387,6 @@ export default function RSVPConfirmation() {
 
             <View style={shareStyles.divider} />
 
-            {/* Copy link */}
             <TouchableOpacity style={shareStyles.row} onPress={copyLink} activeOpacity={0.8}>
               <View style={[shareStyles.iconBox, { backgroundColor: 'rgba(155,142,196,0.12)' }]}>
                 <Text style={shareStyles.icon}>🔗</Text>
@@ -403,7 +399,6 @@ export default function RSVPConfirmation() {
 
             <View style={shareStyles.divider} />
 
-            {/* Post to Bord feed */}
             <TouchableOpacity
               style={[shareStyles.row, postingToFeed && { opacity: 0.5 }]}
               onPress={postToFeed}
@@ -425,18 +420,6 @@ export default function RSVPConfirmation() {
           </Pressable>
         </Pressable>
       </Modal>
-            </>
-          )}
-          <TouchableOpacity
-            style={styles.btnHome}
-            onPress={() => router.replace('/')}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.btnHomeText}>Back to Bord</Text>
-          </TouchableOpacity>
-        </View>
-
-      </ScrollView>
     </View>
   );
 }
@@ -497,7 +480,6 @@ const styles = StyleSheet.create({
     lineHeight: 23, marginBottom: spacing.xl, paddingHorizontal: spacing.sm,
   },
 
-  // Event card
   eventCard: {
     width: '100%', backgroundColor: colors.card,
     borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
@@ -509,7 +491,6 @@ const styles = StyleSheet.create({
   eventTitle: { fontSize: 17, fontWeight: '700', color: colors.white, marginBottom: 6 },
   eventMeta:  { fontSize: 13, color: colors.gray1, fontWeight: '500', marginBottom: 3 },
 
-  // Cancellation
   cancelCard: {
     width: '100%', backgroundColor: 'rgba(249,115,22,0.07)',
     borderWidth: 1, borderColor: 'rgba(249,115,22,0.22)',
@@ -518,7 +499,6 @@ const styles = StyleSheet.create({
   cancelTitle: { fontSize: 14, fontWeight: '700', color: colors.orange, marginBottom: spacing.xs },
   cancelBody:  { fontSize: 13, color: colors.gray1, lineHeight: 20 },
 
-  // Checklist
   checklistCard: {
     width: '100%', backgroundColor: 'rgba(52,211,153,0.05)',
     borderWidth: 1, borderColor: 'rgba(52,211,153,0.18)',
@@ -534,7 +514,6 @@ const styles = StyleSheet.create({
   checkDotText: { color: colors.green, fontSize: 12, fontWeight: '700' },
   checkText: { flex: 1, fontSize: 13, color: colors.gray1, lineHeight: 19 },
 
-  // Waitlist card
   waitlistCard: {
     width: '100%', backgroundColor: colors.card,
     borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
@@ -548,7 +527,6 @@ const styles = StyleSheet.create({
   wlLabel: { fontSize: 13, color: colors.gray1, flex: 1 },
   wlValue: { fontSize: 13, color: colors.white, fontWeight: '600', textAlign: 'right', flex: 1 },
 
-  // Waitlist quote
   waitlistQuoteCard: {
     width: '100%', backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
@@ -558,7 +536,6 @@ const styles = StyleSheet.create({
   waitlistQuote: { fontSize: 13, color: colors.gray1, fontStyle: 'italic', lineHeight: 20, marginBottom: spacing.xs },
   waitlistQuoteAttrib: { fontSize: 11, color: colors.gray2, fontWeight: '600' },
 
-  // Actions
   actions: { width: '100%', gap: spacing.sm },
   btnTicket: {
     backgroundColor: 'rgba(249,115,22,0.12)', borderRadius: radius.md,

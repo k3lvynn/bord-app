@@ -1,11 +1,11 @@
 // app/(tabs)/index.tsx
 // Home — Compete / Gather toggle with event cards.
-// Each card shows a small static-style map pin preview when coordinates exist.
+// Supports both tap-to-switch and swipe gestures on the paged list.
 
 import { useState, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, FlatList,
-  RefreshControl, Animated, Dimensions, ScrollView, Image,
+  RefreshControl, Animated, Dimensions, ScrollView, Image, NativeSyntheticEvent, NativeScrollEvent,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
@@ -76,10 +76,10 @@ export default function HomeTab() {
   };
 
   useFocusEffect(useCallback(() => {
-    // Roll forward any recurring events whose date has passed
     advanceRecurringEvents().catch(() => {});
     load();
   }, [user]));
+
   const onRefresh = () => { setRefreshing(true); load(); };
 
   const toggleFab = () => {
@@ -94,10 +94,20 @@ export default function HomeTab() {
     Animated.spring(fabAnim, { toValue: 0, useNativeDriver: true }).start();
   };
 
+  // Switch tab via tap on the tab bar
   const switchTab = (idx: TabKey) => {
     setActiveTab(idx);
     scrollRef.current?.scrollTo({ x: idx * SCREEN_W, animated: true });
     Animated.spring(indicatorX, { toValue: idx, useNativeDriver: false }).start();
+  };
+
+  // Sync tab indicator when user swipes
+  const onSwipeEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const page = Math.round(e.nativeEvent.contentOffset.x / SCREEN_W) as TabKey;
+    if (page !== activeTab) {
+      setActiveTab(page);
+      Animated.spring(indicatorX, { toValue: page, useNativeDriver: false }).start();
+    }
   };
 
   const indicatorLeft = indicatorX.interpolate({
@@ -116,7 +126,6 @@ export default function HomeTab() {
           <Text style={styles.greeting}>{greeting}</Text>
           <Text style={styles.sub}>What are you doing this weekend?</Text>
         </View>
-        {/* Inbox bell */}
         <TouchableOpacity
           style={styles.inboxBtn}
           onPress={() => { closeFab(); router.push('/inbox'); }}
@@ -150,12 +159,14 @@ export default function HomeTab() {
         </View>
       </View>
 
-      {/* Paged lists */}
+      {/* Paged lists — swipe enabled */}
       <ScrollView
         ref={scrollRef}
-        horizontal pagingEnabled
+        horizontal
+        pagingEnabled
         showsHorizontalScrollIndicator={false}
-        scrollEnabled={false}
+        scrollEnabled={true}
+        onMomentumScrollEnd={onSwipeEnd}
         style={{ flex: 1 }}
       >
         <View style={{ width: SCREEN_W }}>
@@ -180,12 +191,12 @@ export default function HomeTab() {
         </View>
       </ScrollView>
 
-      {/* FAB backdrop — tap to close menu */}
+      {/* FAB backdrop */}
       {fabOpen && (
         <TouchableOpacity style={styles.fabBackdrop} onPress={closeFab} activeOpacity={1} />
       )}
 
-      {/* FAB menu items — animate in/out */}
+      {/* FAB menu */}
       <Animated.View style={[
         styles.fabMenu,
         {
@@ -213,11 +224,7 @@ export default function HomeTab() {
       </Animated.View>
 
       {/* FAB button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={toggleFab}
-        activeOpacity={0.9}
-      >
+      <TouchableOpacity style={styles.fab} onPress={toggleFab} activeOpacity={0.9}>
         <Animated.Text style={[
           styles.fabIcon,
           { transform: [{ rotate: fabAnim.interpolate({ inputRange: [0,1], outputRange: ['0deg','45deg'] }) }] },
@@ -252,7 +259,6 @@ function EventCard({
       <View style={[styles.cardBar, { backgroundColor: accent }]} />
       <View style={styles.cardBody}>
 
-        {/* Category + badge */}
         <View style={styles.cardTop}>
           <Text style={styles.cardCat}>
             {getCategoryEmoji(event.category)}{' '}{formatCategoryLabel(event.category).toUpperCase()}
@@ -271,7 +277,6 @@ function EventCard({
         <Text style={styles.cardTitle} numberOfLines={2}>{event.title}</Text>
         <Text style={styles.cardMeta}>{'📅 '}{formatDate(event.date)}{' · '}{formatTime(event.time)}</Text>
 
-        {/* Mini map OR location text */}
         {hasCoords && MapView ? (
           <TouchableOpacity
             style={styles.miniMapWrap}
@@ -309,7 +314,6 @@ function EventCard({
           </View>
         )}
 
-        {/* Media thumbnails */}
         {linked.length > 0 && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.thumbStrip} contentContainerStyle={{ gap: 6 }}>
             {linked.map(p => (
@@ -323,7 +327,6 @@ function EventCard({
           </ScrollView>
         )}
 
-        {/* Footer */}
         <View style={styles.cardFooter}>
           {mode === 'compete' && event.buy_in_amount ? (
             <View style={[styles.buyInPill, { borderColor: colors.orange + '44', backgroundColor: colors.orange + '18' }]}>
@@ -339,9 +342,8 @@ function EventCard({
           </Text>
         </View>
 
-        {/* Capacity bar */}
         <View style={styles.barBg}>
-          <View style={[styles.barFill, { width: pct + '%', backgroundColor: isFull ? colors.rose : accent }]} />
+          <View style={[styles.barFill, { width: (pct + '%') as any, backgroundColor: isFull ? colors.rose : accent }]} />
         </View>
       </View>
     </TouchableOpacity>
@@ -385,12 +387,11 @@ const styles = StyleSheet.create({
   },
   greeting: { fontSize: 22, fontWeight: '800', color: colors.white },
   sub:      { fontSize: 12, color: colors.gray1, marginTop: 2 },
-  // Inbox bell
+
   inboxBtn: {
     width: 42, height: 42, borderRadius: 21,
     backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border,
-    alignItems: 'center', justifyContent: 'center',
-    position: 'relative',
+    alignItems: 'center', justifyContent: 'center', position: 'relative',
   },
   inboxIcon:      { fontSize: 20 },
   inboxBadge: {
@@ -400,7 +401,6 @@ const styles = StyleSheet.create({
   },
   inboxBadgeText: { color: colors.white, fontSize: 10, fontWeight: '800' },
 
-  // FAB
   fabBackdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.45)',
@@ -463,7 +463,6 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 17, fontWeight: '700', color: colors.white, marginBottom: 6, lineHeight: 22 },
   cardMeta:  { fontSize: 12, color: colors.gray1, marginBottom: 4, fontWeight: '500' },
 
-  // Mini map
   miniMapWrap:  { height: 100, borderRadius: radius.sm, overflow: 'hidden', marginBottom: spacing.sm, position: 'relative' },
   miniMap:      { width: '100%', height: '100%' },
   miniPin:      { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: colors.white },
@@ -473,7 +472,6 @@ const styles = StyleSheet.create({
   },
   miniMapLabelText: { fontSize: 11, color: colors.white, fontWeight: '600' },
 
-  // Location fallback pill
   locationPill: {
     backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: radius.sm,
     borderWidth: 1, borderColor: colors.border,
@@ -481,7 +479,6 @@ const styles = StyleSheet.create({
   },
   locationPillText: { fontSize: 12, color: colors.gray1, fontWeight: '500' },
 
-  // Thumbnails
   thumbStrip: { marginBottom: spacing.xs },
   thumb: { width: 68, height: 68, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border },
   thumbAdd: {

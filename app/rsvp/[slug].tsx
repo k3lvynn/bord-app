@@ -4,7 +4,6 @@ import {
   TextInput, KeyboardAvoidingView, Platform, Alert, ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-// Safe-require stripe — works in Expo Go too (just shows fallback for paid events)
 let useStripe: (() => { initPaymentSheet: any; presentPaymentSheet: any }) | null = null;
 try {
   useStripe = require('@stripe/stripe-react-native').useStripe;
@@ -48,13 +47,35 @@ export default function RSVPScreen() {
   const inp = (f: string) => [styles.input, focused === f && styles.inputFocused];
 
   const validate = (): string | null => {
-    if (!name.trim())                    return 'Please enter your name.';
+    if (!name.trim())                         return 'Please enter your name.';
     if (!email.trim() || !email.includes('@')) return 'Please enter a valid email.';
-    if (!agreed)                         return 'Please agree to the terms to continue.';
+    if (!agreed)                              return 'Please agree to the terms to continue.';
     return null;
   };
 
-  // ── FREE EVENT — just submit RSVP directly ─────────────────────────────────
+  // Shared confirmation params builder
+  const confirmationParams = (rsvp: any, isConfirmed: boolean) => ({
+    rsvpId:               rsvp.id,
+    eventId:              event!.id,
+    eventTitle:           event!.title,
+    eventDate:            event!.date,
+    eventTime:            event!.time,
+    eventEndTime:         event!.end_time ?? '',
+    eventLocation:        event!.location,
+    eventSlug:            event!.slug,
+    eventDescription:     event!.description ?? '',
+    eventCategory:        event!.category ?? '',
+    eventCap:             String(event!.cap),
+    prizePool:            event!.prize_pool ?? '',
+    name:                 rsvp.name,
+    isConfirmed:          isConfirmed ? '1' : '0',
+    waitlistPosition:     rsvp.waitlist_position?.toString() ?? '',
+    cancellationDeadline: rsvp.cancellation_deadline ?? '',
+    hasBuyIn:             event!.has_buy_in ? '1' : '0',
+    buyInAmount:          buyInAmount.toString(),
+  });
+
+  // ── FREE EVENT ─────────────────────────────────────────────────────────────
   const handleFreeSubmit = async () => {
     const err = validate();
     if (err) { Alert.alert('Almost there', err); return; }
@@ -67,30 +88,10 @@ export default function RSVPScreen() {
         email: email.trim().toLowerCase(),
         phone: phone.trim() || undefined,
       });
-      // Save "bringing" if selected (non-blocking)
       if (bringing && bringing !== 'nothing') {
         await updateRsvpBringing(rsvp.id, bringing).catch(() => {});
       }
-      router.replace({
-        pathname: '/rsvp/confirmation',
-        params: {
-          rsvpId:               rsvp.id,
-          eventId:              event.id,
-          eventTitle:           event.title,
-          eventDate:            event.date,
-          eventTime:            event.time,
-          eventEndTime:         event.end_time ?? '',
-          eventLocation:        event.location,
-          eventSlug:            event.slug,
-          eventDescription:     event.description ?? '',
-          name:                 rsvp.name,
-          isConfirmed:          isConfirmed ? '1' : '0',
-          waitlistPosition:     rsvp.waitlist_position?.toString() ?? '',
-          cancellationDeadline: rsvp.cancellation_deadline ?? '',
-          hasBuyIn:             '0',
-          buyInAmount:          '',
-        },
-      });
+      router.replace({ pathname: '/rsvp/confirmation', params: confirmationParams(rsvp, isConfirmed) });
     } catch (e: any) {
       if (e.message === 'already_registered') {
         Alert.alert('Already registered', 'That email is already on this event. Check your inbox.');
@@ -102,7 +103,7 @@ export default function RSVPScreen() {
     }
   };
 
-  // ── PAID EVENT — init Stripe sheet, then present it ───────────────────────
+  // ── PAID EVENT ─────────────────────────────────────────────────────────────
   const handlePaidSubmit = async () => {
     const err = validate();
     if (err) { Alert.alert('Almost there', err); return; }
@@ -111,7 +112,6 @@ export default function RSVPScreen() {
     setSubmitting(true);
     setStep('paying');
     try {
-      // 1. Create PaymentIntent via Edge Function
       const { clientSecret } = await createPaymentIntent({
         eventId:       event.id,
         eventTitle:    event.title,
@@ -120,69 +120,41 @@ export default function RSVPScreen() {
         attendeeEmail: email.trim().toLowerCase(),
       });
 
-      // 2. Init the Stripe payment sheet
       const { error: initError } = await initPaymentSheet({
         merchantDisplayName:  'Bord',
         paymentIntentClientSecret: clientSecret,
         defaultBillingDetails:     { name: name.trim(), email: email.trim() },
         appearance: {
           colors: {
-            primary:          '#F97316',
-            background:       '#1E1E1E',
+            primary:             '#F97316',
+            background:          '#1E1E1E',
             componentBackground: '#2C2C2C',
-            componentText:    '#FFFFFF',
-            primaryText:      '#FFFFFF',
-            secondaryText:    '#A8A29E',
-            placeholderText:  '#5C5654',
-            icon:             '#F97316',
+            componentText:       '#FFFFFF',
+            primaryText:         '#FFFFFF',
+            secondaryText:       '#A8A29E',
+            placeholderText:     '#5C5654',
+            icon:                '#F97316',
           },
         },
-        applePay:   { merchantCountryCode: 'US' },
-        googlePay:  { merchantCountryCode: 'US', testEnv: __DEV__ },
+        applePay:  { merchantCountryCode: 'US' },
+        googlePay: { merchantCountryCode: 'US', testEnv: __DEV__ },
       });
 
       if (initError) throw new Error(initError.message);
 
-      // 3. Present the sheet — user enters card / uses Apple Pay
       const { error: payError } = await presentPaymentSheet();
-
       if (payError) {
-        if (payError.code === 'Canceled') {
-          // User dismissed — not an error
-          setStep('form');
-          setSubmitting(false);
-          return;
-        }
+        if (payError.code === 'Canceled') { setStep('form'); setSubmitting(false); return; }
         throw new Error(payError.message);
       }
 
-      // 4. Payment succeeded — create the RSVP record
       const { rsvp, isConfirmed } = await submitRSVP(event.id, {
         name:  name.trim(),
         email: email.trim().toLowerCase(),
         phone: phone.trim() || undefined,
       });
 
-      router.replace({
-        pathname: '/rsvp/confirmation',
-        params: {
-          rsvpId:               rsvp.id,
-          eventId:              event.id,
-          eventTitle:           event.title,
-          eventDate:            event.date,
-          eventTime:            event.time,
-          eventEndTime:         event.end_time ?? '',
-          eventLocation:        event.location,
-          eventSlug:            event.slug,
-          eventDescription:     event.description ?? '',
-          name:                 rsvp.name,
-          isConfirmed:          isConfirmed ? '1' : '0',
-          waitlistPosition:     rsvp.waitlist_position?.toString() ?? '',
-          cancellationDeadline: rsvp.cancellation_deadline ?? '',
-          hasBuyIn:             '1',
-          buyInAmount:          buyInAmount.toString(),
-        },
-      });
+      router.replace({ pathname: '/rsvp/confirmation', params: confirmationParams(rsvp, isConfirmed) });
     } catch (e: any) {
       Alert.alert('Payment failed', e.message ?? 'Something went wrong. Your card was not charged.');
       setStep('form');
@@ -193,7 +165,6 @@ export default function RSVPScreen() {
 
   const handleSubmit = event?.has_buy_in && !isFull ? handlePaidSubmit : handleFreeSubmit;
 
-  // ── LOADING ────────────────────────────────────────────────────────────────
   if (loading || !event) {
     return (
       <View style={[globalStyles.screen, { alignItems: 'center', justifyContent: 'center' }]}>
@@ -202,7 +173,6 @@ export default function RSVPScreen() {
     );
   }
 
-  // ── PAYING STATE — brief overlay while Stripe sheet loads ─────────────────
   if (step === 'paying' && submitting) {
     return (
       <View style={[globalStyles.screen, { alignItems: 'center', justifyContent: 'center', gap: 16 }]}>
@@ -216,7 +186,6 @@ export default function RSVPScreen() {
     <KeyboardAvoidingView style={globalStyles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
 
-        {/* Event summary */}
         <View style={styles.eventCard}>
           <View style={[styles.eventCardBar, event.has_buy_in ? styles.barCompete : styles.barGather]} />
           <View style={styles.eventCardBody}>
@@ -231,7 +200,6 @@ export default function RSVPScreen() {
           </View>
         </View>
 
-        {/* Waitlist banner */}
         {isFull && (
           <View style={styles.waitlistBanner}>
             <Text style={styles.waitlistTitle}>⚠️ Event is full — joining waitlist</Text>
@@ -241,7 +209,6 @@ export default function RSVPScreen() {
           </View>
         )}
 
-        {/* Form */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{isFull ? 'Join Waitlist' : 'Register'}</Text>
 
@@ -271,7 +238,6 @@ export default function RSVPScreen() {
           />
         </View>
 
-        {/* Gather: Bring something? */}
         {!event.has_buy_in && (event.bring_options?.length ?? 0) > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>🧺 Bringing anything?</Text>
@@ -280,10 +246,7 @@ export default function RSVPScreen() {
               {BRING_OPTIONS.filter(b => event.bring_options?.includes(b.key)).map(b => (
                 <TouchableOpacity
                   key={b.key}
-                  style={[
-                    styles.bringChip,
-                    bringing === b.key && styles.bringChipActive,
-                  ]}
+                  style={[styles.bringChip, bringing === b.key && styles.bringChipActive]}
                   onPress={() => setBringing(bringing === b.key ? null : b.key)}
                   activeOpacity={0.7}
                 >
@@ -301,7 +264,6 @@ export default function RSVPScreen() {
           </View>
         )}
 
-        {/* Order summary — only for paid events when not waitlisted */}
         {event.has_buy_in && !isFull && (
           <View style={styles.orderCard}>
             <Text style={styles.orderTitle}>💳 Order Summary</Text>
@@ -322,7 +284,6 @@ export default function RSVPScreen() {
           </View>
         )}
 
-        {/* Terms checkbox */}
         <TouchableOpacity style={styles.agreeRow} onPress={() => setAgreed(!agreed)} activeOpacity={0.8}>
           <View style={[styles.checkbox, agreed && styles.checkboxChecked]}>
             {agreed && <Text style={styles.checkmark}>✓</Text>}
@@ -332,13 +293,8 @@ export default function RSVPScreen() {
           </Text>
         </TouchableOpacity>
 
-        {/* CTA */}
         <TouchableOpacity
-          style={[
-            styles.submitBtn,
-            isFull && styles.submitBtnWaitlist,
-            submitting && { opacity: 0.6 },
-          ]}
+          style={[styles.submitBtn, isFull && styles.submitBtnWaitlist, submitting && { opacity: 0.6 }]}
           onPress={handleSubmit}
           disabled={submitting}
           activeOpacity={0.85}
@@ -346,11 +302,7 @@ export default function RSVPScreen() {
           {submitting
             ? <ActivityIndicator color={colors.white} />
             : <Text style={styles.submitText}>
-                {isFull
-                  ? 'Join Waitlist →'
-                  : event.has_buy_in
-                  ? `Pay ${formatAmount(totalCents)} & Register →`
-                  : 'Confirm RSVP →'}
+                {isFull ? 'Join Waitlist →' : event.has_buy_in ? `Pay ${formatAmount(totalCents)} & Register →` : 'Confirm RSVP →'}
               </Text>
           }
         </TouchableOpacity>
@@ -448,8 +400,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(155,142,196,0.06)', borderWidth: 1, borderColor: 'rgba(155,142,196,0.2)',
     borderRadius: radius.full, paddingHorizontal: 14, paddingVertical: 8,
   },
-  bringChipActive: {
-    borderColor: '#9B8EC4', backgroundColor: 'rgba(155,142,196,0.18)',
-  },
+  bringChipActive: { borderColor: '#9B8EC4', backgroundColor: 'rgba(155,142,196,0.18)' },
   bringChipText: { fontSize: 14, color: colors.gray1, fontWeight: '500' },
 });

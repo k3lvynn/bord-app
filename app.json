@@ -2,7 +2,7 @@
   "expo": {
     "name": "Bord",
     "slug": "bord",
-    "version": "1.0.56",
+    "version": "1.0.57",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -17,7 +17,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "app.bord.host",
-      "buildNumber": "56",
+      "buildNumber": "57",
       "infoPlist": {
         "NSCameraUsageDescription": "Bord uses your camera to add photos to your event.",
         "NSPhotoLibraryUsageDescription": "Bord uses your photo library so you can share moments from events.",
@@ -45,7 +45,7 @@
         "backgroundColor": "#F97316"
       },
       "package": "app.bord.host",
-      "versionCode": 56,
+      "versionCode": 57,
       "permissions": [
         "CAMERA",
         "ACCESS_FINE_LOCATION",
@@ -66,12 +66,12 @@
             {
               "scheme": "https",
               "host": "bordevents.com",
-              "pathPrefix": "/events"
+              "pathPrefix": "/event"
             },
             {
               "scheme": "https",
               "host": "www.bordevents.com",
-              "pathPrefix": "/events"
+              "pathPrefix": "/event"
             }
           ],
           "category": [
@@ -129,7 +129,8 @@
           "microphonePermission": false
         }
       ],
-      "expo-av"
+      "expo-av",
+      "expo-asset"
     ],
     "scheme": "bord",
     "extra": {
